@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive CPU Scheduling Visualizer — simulate RR, FCFS, SJF, and Priority algorithms with Gantt chart visualization.">
+    <title>CPU Scheduling Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                    <rect x="9" y="9" width="6" height="6"></rect>
+                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                    <line x1="20" y1="9" x2="23" y2="9"></line>
+                    <line x1="20" y1="14" x2="23" y2="14"></line>
+                    <line x1="1" y1="9" x2="4" y2="9"></line>
+                    <line x1="1" y1="14" x2="4" y2="14"></line>
+                </svg>
+            </div>
+            <div>
+                <h1>CPU Scheduling Visualizer</h1>
+                <p class="subtitle">Simulate and visualize scheduling algorithms in real-time</p>
+            </div>
+        </header>
+
+        <!-- Controls Panel -->
+        <section class="panel controls-panel" id="controls-panel">
+            <div class="panel-header">
+                <h2>⚙ Configuration</h2>
+            </div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="algorithm-select">Algorithm</label>
+                    <div class="select-wrapper">
+                        <select id="algorithm-select">
+                            <option value="RR">Round Robin (RR)</option>
+                            <option value="FCFS">First Come First Served</option>
+                            <option value="SJF">Shortest Job First</option>
+                            <option value="PRIORITY">Priority Scheduling</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group" id="quantum-group">
+                    <label for="quantum-input">Time Quantum</label>
+                    <input type="number" id="quantum-input" value="2" min="1" max="20">
+                </div>
+            </div>
+
+            <!-- Process Table -->
+            <div class="process-section">
+                <div class="process-header">
+                    <h3>📋 Process Table</h3>
+                    <button class="btn btn-sm btn-ghost" id="add-process-btn">+ Add Process</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="process-table">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Arrival Time</th>
+                                <th>Burst Time</th>
+                                <th class="priority-col">Priority</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="process-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-primary btn-run" id="run-btn">▶ Run Scheduler</button>
+                <button class="btn btn-accent btn-run" id="compare-btn">⚖ Compare All</button>
+                <button class="btn btn-ghost" id="reset-btn">↻ Reset</button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="panel results-panel hidden" id="results-panel">
+            <div class="panel-header">
+                <h2>📊 Execution Timeline</h2>
+                <span class="badge" id="algorithm-badge">RR</span>
+            </div>
+            <div class="gantt-container" id="gantt-container">
+                <div class="gantt-chart" id="gantt-chart"></div>
+                <div class="gantt-timeline" id="gantt-timeline"></div>
+            </div>
+            <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <!-- Queue Visualization Section -->
+        <section class="panel queue-panel hidden" id="queue-panel">
+            <div class="panel-header">
+                <h2>🔄 Queue Visualization</h2>
+                <div class="queue-controls">
+                    <button class="btn btn-sm btn-ghost" id="queue-prev-btn" disabled>◀ Prev</button>
+                    <span class="queue-step-label" id="queue-step-label">Step 0 / 0</span>
+                    <button class="btn btn-sm btn-ghost" id="queue-next-btn">Next ▶</button>
+                    <button class="btn btn-sm btn-ghost" id="queue-play-btn">⏵ Play</button>
+                </div>
+            </div>
+            <div class="queue-display">
+                <div class="queue-row">
+                    <div class="queue-label">CPU</div>
+                    <div class="queue-track cpu-track" id="cpu-track">
+                        <span class="queue-empty">Idle</span>
+                    </div>
+                </div>
+                <div class="queue-row">
+                    <div class="queue-label" id="queue-type-label">Ready Queue</div>
+                    <div class="queue-track ready-track" id="ready-track">
+                        <span class="queue-empty">Empty</span>
+                    </div>
+                </div>
+                <div class="queue-row">
+                    <div class="queue-label">Completed</div>
+                    <div class="queue-track completed-track" id="completed-track">
+                        <span class="queue-empty">None</span>
+                    </div>
+                </div>
+            </div>
+            <div class="queue-event-log" id="queue-event-log">
+                <p class="queue-event">Waiting for simulation...</p>
+            </div>
+        </section>
+
+        <!-- Algorithm Comparison Dashboard -->
+        <section class="panel compare-panel hidden" id="compare-panel">
+            <div class="panel-header">
+                <h2>⚖ Algorithm Comparison</h2>
+                <button class="btn btn-sm btn-ghost" id="close-compare-btn">✕ Close</button>
+            </div>
+
+            <!-- Side-by-side Gantt Charts -->
+            <div class="compare-timelines" id="compare-timelines"></div>
+
+            <!-- Metrics Comparison Table -->
+            <div class="compare-table-section">
+                <h3 class="section-title">📈 Metrics Comparison</h3>
+                <div class="table-wrapper">
+                    <table class="compare-table" id="compare-table">
+                        <thead>
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Avg Waiting Time</th>
+                                <th>Avg Turnaround</th>
+                                <th>CPU Utilization</th>
+                                <th>Total Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compare-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Insight Layer -->
+            <div class="insight-box" id="insight-box">
+                <div class="insight-header">
+                    <span class="insight-icon">💡</span>
+                    <h3>Analysis & Insights</h3>
+                </div>
+                <div class="insight-content" id="insight-content">
+                    <p>Run a comparison to see insights.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay hidden" id="loading-overlay">
+            <div class="loader">
+                <div class="loader-ring"></div>
+                <p>Executing scheduler...</p>
+            </div>
+        </div>
+
+        <!-- Error Toast -->
+        <div class="toast hidden" id="error-toast">
+            <span id="error-message">An error occurred.</span>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Built with <span class="heart">♥</span> using C++ · Node.js · Vanilla JS</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
