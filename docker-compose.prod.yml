@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  # ── FastAPI Backend (Pure Python) ──────────────────────────────────────
+  backend:
+    image: siddhant1405/scheduler-backend:latest
+    container_name: scheduler-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── React Frontend (nginx) ───────────────────────────────────────────
+  frontend:
+    image: siddhant1405/scheduler-frontend:latest
+    container_name: scheduler-frontend
+    ports:
+      - "80:80"  # Exposing directly on port 80 for cloud access
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
