@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.vscode
+.idea
+*.exe
+*.log
+README.md
+.DS_Store
+Thumbs.db
+frontend_old
+__pycache__
+*.pyc
+.env
+dist

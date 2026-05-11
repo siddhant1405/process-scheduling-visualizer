@@ -1,9 +1,6 @@
 # Dependencies
 node_modules/
 
-# Compiled binary
-cpp/*.exe
-
 # OS files
 .DS_Store
 Thumbs.db
@@ -14,3 +11,14 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build output
+frontend/dist/
+
