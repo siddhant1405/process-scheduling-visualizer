@@ -185,7 +185,7 @@ export default function App() {
       </div>
 
       <footer className="footer">
-        <p>Built with <span className="heart">♥</span> using C++ · FastAPI · React</p>
+        <p>Built with <span className="heart">♥</span> using FastAPI · React.Js </p>
       </footer>
     </>
   );
