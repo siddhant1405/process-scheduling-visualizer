@@ -2,7 +2,7 @@
 # Backend Dockerfile: Pure Python FastAPI
 # Build context is the project root (set in docker-compose.yml)
 # ──────────────────────────────────────────────────────────────────────────────
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
